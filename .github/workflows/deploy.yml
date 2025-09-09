@@ -26,12 +26,11 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Build & Export
+      - name: Build (produces ./out)
         env:
           GITHUB_PAGES: 'true'   # flips basePath/assetPrefix if you set them
         run: |
           npm run build
-          npm run export
           # prevent Jekyll from rewriting files
           touch out/.nojekyll
 
