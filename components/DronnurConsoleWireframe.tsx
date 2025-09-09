@@ -22,7 +22,7 @@ const LabeledRow: React.FC<{ label: string; children?: React.ReactNode }>=({ lab
 );
 
 const StatPill: React.FC<{ label: string; value: string }>=({ label, value }) => (
-  <div className="px-3 py-1 rounded-full text-xs bg-gray-100">{label}: <span className="font-semibold">{value}</span></div>
+  <div className="px-3 py-1 rounded-full text-xs/3 bg-gray-100">{label}: <span className="font-semibold">{value}</span></div>
 );
 
 const Toggle: React.FC<{ label: string }>=({ label }) => (
