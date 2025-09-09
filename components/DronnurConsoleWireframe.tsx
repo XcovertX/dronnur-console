@@ -88,7 +88,7 @@ const PPI: React.FC = () => {
 };
 
 const TracksTable: React.FC = () => (
-  <div className="overflow-auto max-h-[360px]">
+  <div className="overflow-auto max-h-160">
     <table className="w-full text-sm">
       <thead>
         <tr className="text-left text-gray-500">
@@ -119,7 +119,7 @@ const TracksTable: React.FC = () => (
 );
 
 const DNESMTable: React.FC = () => (
-  <div className="overflow-auto max-h-[260px]">
+  <div className="overflow-auto max-h-48">
     <table className="w-full text-sm">
       <thead>
         <tr className="text-left text-gray-500">
@@ -183,8 +183,8 @@ const Dashboard: React.FC = () => (
         <PPI />
       </Box>
       <div className="mt-4 grid grid-cols-2 gap-4">
-        <Box title="DNESM Events" className=""><DNESMTable /></Box>
-        <Box title="System Logs"><div className="h-[260px] text-xs font-mono overflow-auto">[12:30:10] INFO Syslog enabled\n[12:30:11] WARN Antenna RPM limited in sector mode\n[12:30:15] INFO External INS active...</div></Box>
+        <Box title="DNESM Events" className="h-64"><DNESMTable /></Box>
+        <Box title="System Logs" className="h-64"><div className="h-64 text-xs font-mono overflow-auto">[12:30:10] INFO Syslog enabled\n[12:30:11] WARN Antenna RPM limited in sector mode\n[12:30:15] INFO External INS active...</div></Box>
       </div>
     </div>
     <div className="col-span-10 space-y-4">
@@ -209,7 +209,7 @@ const Dashboard: React.FC = () => (
           </Box>
         </div>
       </Box>
-      <Box title="Selected Target">
+      <Box title="Selected Target" className="h-56">
         <div className="text-sm space-y-1">
           <div>ID: 1082 | Source: CAT-010</div>
           <div>Lat/Lon: 60.5 / 5.1</div>
@@ -219,7 +219,7 @@ const Dashboard: React.FC = () => (
       </Box>
     </div>
     <div className="col-span-10">
-      <Box title="Active Tracks"><TracksTable /></Box>
+      <Box title="Active Tracks" className="h-187"><TracksTable /></Box>
     </div>
   </div>
 );
