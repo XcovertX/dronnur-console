@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "export": "next export"
+  },
+  "engines": { 
+    "node": "22.x" 
   },
   "dependencies": {
     "react": "19.1.0",
