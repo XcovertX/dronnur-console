@@ -448,7 +448,7 @@ export default function DronnurConsoleWireframe() {
 
 
       {/* Content */}
-      <div className="max-w-10xl mx-auto px-4">
+      <div className="max-w-10xl mx-auto px-4 py-4">
         
         {/* Tabs */}
         <div className="flex justify-end gap-2 mb-5">
