@@ -74,8 +74,8 @@ const PPI: React.FC = () => {
         </div>
       ))}
       {/* Sweep arc (placeholder) */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="h-[2px] w-1/2 bg-black/30 origin-right" style={{ transform:"rotate(25deg)"}} />
+      <div className="absolute inset-0 flex items-center justify-left">
+        <div className="h-[4px] w-1/2 bg-black/30 origin-right" style={{ transform:"rotate(50deg)"}} />
       </div>
       {/* Targets (placeholders) */}
       <div className="absolute left-[70%] top-[40%] w-2 h-2 rounded-full bg-emerald-500" />
