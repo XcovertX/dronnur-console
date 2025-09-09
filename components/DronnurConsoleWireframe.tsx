@@ -56,7 +56,7 @@ const Box: React.FC<{ title?: string; className?: string; right?: React.ReactNod
 
 const PPI: React.FC = () => {
   return (
-    <div className="relative w-full aspect-square max-h-[520px] max-w-[520] mx-auto">
+    <div className="relative w-full aspect-square max-h-[400px] max-w-[400] mx-auto">
       <div className="absolute inset-0 rounded-full border-2 border-gray-300" />
       {/* Range rings */}
       <div className="absolute inset-6 rounded-full border border-gray-400" />
@@ -172,8 +172,8 @@ const Login: React.FC = () => (
 );
 
 const Dashboard: React.FC = () => (
-  <div className="grid grid-cols-12 gap-4">
-    <div className="col-span-8">
+  <div className="grid grid-cols-36 gap-4">
+    <div className="col-span-16">
       <Box title="Plan Position Indicator (PPI)" right={<div className="flex gap-2"> <StatPill label="Range" value="18 km"/> <StatPill label="North" value="Up"/> </div>}>
         <PPI />
       </Box>
@@ -182,9 +182,9 @@ const Dashboard: React.FC = () => (
         <Box title="System Logs"><div className="h-[260px] text-xs font-mono overflow-auto">[12:30:10] INFO Syslog enabled\n[12:30:11] WARN Antenna RPM limited in sector mode\n[12:30:15] INFO External INS active...</div></Box>
       </div>
     </div>
-    <div className="col-span-4 space-y-4">
-      <Box title="System Status">
-        <div className="flex flex-wrap gap-2 mb-2">
+    <div className="col-span-10 space-y-4">
+      <Box title="System Status" className="">
+        <div className="flex mb-2">
           <StatPill label="Tx Mode" value="Surveillance" />
           <StatPill label="Tx Power" value="10" />
           <StatPill label="RPM" value="10.0" />
@@ -196,7 +196,7 @@ const Dashboard: React.FC = () => (
             <LabeledRow label="INS Source">External INS</LabeledRow>
             <LabeledRow label="Gyro Heading">132.5°</LabeledRow>
           </Box>
-          <Box title="Modules Temps">
+          <Box title="Modules Temps"className="col-span-2">
             <LabeledRow label="Processor">32°C</LabeledRow>
             <LabeledRow label="RF Converter">33°C</LabeledRow>
             <LabeledRow label="Power Amp">35°C</LabeledRow>
@@ -213,7 +213,7 @@ const Dashboard: React.FC = () => (
         </div>
       </Box>
     </div>
-    <div className="col-span-12">
+    <div className="col-span-10">
       <Box title="Active Tracks"><TracksTable /></Box>
     </div>
   </div>
@@ -442,7 +442,7 @@ export default function DronnurConsoleWireframe() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-5">
+      <div className="max-w-10xl mx-auto px-4 py-5">
         {/* Tabs */}
         <div className="flex flex-wrap gap-2 mb-5">
           {tabs.map(t => (
