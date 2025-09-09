@@ -42,7 +42,12 @@ const Slider: React.FC<{ min?: number; max?: number; step?: number }>=({ min=0, 
   <input type="range" min={min} max={max} step={step} className="w-full" />
 );
 
-const Box: React.FC<{ title?: string; className?: string; right?: React.ReactNode }>=({ title, className, right, children }) => (
+type BoxProps = React.PropsWithChildren<{
+  title?: string;
+  className?: string;
+  right?: React.ReactNode;
+}>;
+const Box: React.FC<{ title?: string; className?: string; right?: React.ReactNode }>=({ title, className, right, children }: BoxProps) => (
   <div className={`rounded-2xl border bg-white shadow-sm ${className ?? ""}`}>
     {(title || right) && (
       <div className="flex items-center justify-between px-4 py-2.5 border-b">
