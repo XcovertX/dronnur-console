@@ -102,7 +102,7 @@ const TracksTable: React.FC = () => (
         </tr>
       </thead>
       <tbody>
-        {Array.from({ length: 12 }).map((_,i)=> (
+        {Array.from({ length: 20 }).map((_,i)=> (
           <tr key={i} className="border-t">
             <td className="py-2 pr-2">{100+i}</td>
             <td className="py-2 pr-2">CAT-010</td>
