@@ -178,7 +178,7 @@ const Dashboard: React.FC = () => (
         <PPI />
       </Box>
       <div className="mt-4 grid grid-cols-2 gap-4">
-        <Box title="DNESM Events"><DNESMTable /></Box>
+        <Box title="DNESM Events" className=""><DNESMTable /></Box>
         <Box title="System Logs"><div className="h-[260px] text-xs font-mono overflow-auto">[12:30:10] INFO Syslog enabled\n[12:30:11] WARN Antenna RPM limited in sector mode\n[12:30:15] INFO External INS active...</div></Box>
       </div>
     </div>
