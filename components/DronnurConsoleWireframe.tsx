@@ -430,7 +430,7 @@ export default function DronnurConsoleWireframe() {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Top Bar */}
-      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
+      {/* <div className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-xl bg-black" />
@@ -444,15 +444,28 @@ export default function DronnurConsoleWireframe() {
             <StatPill label="Unit" value="SN 00012345" />
           </div>
         </div>
-      </div>
+      </div> */}
+
 
       {/* Content */}
-      <div className="max-w-10xl mx-auto px-4 py-5">
+      <div className="max-w-10xl mx-auto px-4">
+        
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-5">
+        <div className="flex justify-end gap-2 mb-5">
+          <div className="flex flex-grow items-center gap-3">
+            <div className="h-8 w-8 rounded-xl bg-black" />
+            <div>
+              <div className="text-sm font-semibold leading-4">Dronnur Radar Console</div>
+              <div className="text-xs text-gray-500">Interactive Wireframe</div>
+            </div>
+          </div>
           {tabs.map(t => (
             <TabButton key={t} label={t} active={active===t} onClick={()=>setActive(t)} />
           ))}
+          <div className="flex flex-col items-center">
+            <StatPill label="Connected" value="192.168.1.248" />
+            <StatPill label="Unit" value="SN 00012345" />
+          </div>
         </div>
 
         {/* Pages */}
