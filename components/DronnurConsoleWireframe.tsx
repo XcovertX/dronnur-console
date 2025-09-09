@@ -47,7 +47,7 @@ type BoxProps = React.PropsWithChildren<{
   className?: string;
   right?: React.ReactNode;
 }>;
-const Box: React.FC<{ title?: string; className?: string; right?: React.ReactNode }>=({ title, className, right, children }: BoxProps) => (
+const Box = ({ title, className, right, children }: BoxProps) => (
   <div className={`rounded-2xl border bg-white shadow-sm ${className ?? ""}`}>
     {(title || right) && (
       <div className="flex items-center justify-between px-4 py-2.5 border-b">
