@@ -56,11 +56,11 @@ const Box: React.FC<{ title?: string; className?: string; right?: React.ReactNod
 
 const PPI: React.FC = () => {
   return (
-    <div className="relative w-full aspect-square max-h-[520px] mx-auto">
+    <div className="relative w-full aspect-square max-h-[520px] max-w-[520] mx-auto">
       <div className="absolute inset-0 rounded-full border-2 border-gray-300" />
       {/* Range rings */}
-      <div className="absolute inset-6 rounded-full border border-gray-200" />
-      <div className="absolute inset-12 rounded-full border border-gray-200" />
+      <div className="absolute inset-6 rounded-full border border-gray-400" />
+      <div className="absolute inset-12 rounded-full border border-gray-600" />
       <div className="absolute inset-20 rounded-full border border-gray-200" />
       {/* Bearing spokes */}
       {[0,45,90,135].map((deg)=> (
