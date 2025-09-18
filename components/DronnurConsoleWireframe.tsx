@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-// Dronnur Radar Console – Interactive Wireframe (v1)
+// Radar Console – Interactive Wireframe (v1)
 // Notes:
 // - Pure React + TailwindCSS (no external UI libs) for maximum portability in preview.
 // - This is a clickable wireframe to communicate layout & workflow, not final UI.
@@ -147,7 +147,7 @@ const DNESMTable: React.FC = () => (
 
 const Login: React.FC = () => (
   <div className="max-w-md mx-auto">
-    <SectionHeader title="Login" subtitle="Authenticate to your Dronnur radar" />
+    <SectionHeader title="Login" subtitle="Authenticate to your radar" />
     <Box>
       <div className="space-y-3">
         <div className="grid grid-cols-3 items-center gap-3">
@@ -161,7 +161,7 @@ const Login: React.FC = () => (
         <button className="mt-2 w-full rounded-xl bg-black text-white py-2 text-sm">Sign in</button>
       </div>
     </Box>
-    <SectionHeader title="Discovery" subtitle="Detected Dronnur units on the network" />
+    <SectionHeader title="Discovery" subtitle="Detected units on the network" />
     <Box>
       <div className="grid grid-cols-3 gap-3 text-sm">
         <div className="col-span-2 space-y-1">
