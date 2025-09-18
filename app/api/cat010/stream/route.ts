@@ -1,23 +1,25 @@
 import { onCat010 } from "@/app/lib/udp-cat010";
+
 export const runtime = "nodejs";
 
 export async function GET() {
   const stream = new ReadableStream({
     start(controller) {
       const enc = new TextEncoder();
-      const unsub = onCat010((hex, len) => {
-        const payload = JSON.stringify({ len, hex });
+      const unsub = onCat010((buf) => {
+        // send as hex for now (parsing comes next)
+        const payload = JSON.stringify({ len: buf.length, hex: buf.toString("hex") });
         controller.enqueue(enc.encode(`data: ${payload}\n\n`));
       });
       const ping = setInterval(() => controller.enqueue(enc.encode(":keepalive\n\n")), 15000);
-      controller.enqueue(enc.encode("retry: 3000\n\n"));
-      // @ts-expect-error close
+      // @ts-expect-error stash
       this.unsub = unsub; this.ping = ping;
+      controller.enqueue(new TextEncoder().encode("retry: 3000\n\n"));
     },
     cancel() {
-      // @ts-expect-error close
+      // @ts-expect-error read back
       if (this.unsub) this.unsub();
-      // @ts-expect-error close
+      // @ts-expect-error read back
       if (this.ping) clearInterval(this.ping);
     }
   });
