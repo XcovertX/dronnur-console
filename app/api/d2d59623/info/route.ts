@@ -1,7 +1,7 @@
 import { readSnapshot } from "@/app/lib/d2d59623";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {

@@ -1,7 +1,7 @@
 import { sendViaInfoPort } from "@/app/lib/d2d59623";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";
 
 // Safety: block Tx unless ALLOW_TX=true
 function guard(body: any) {
