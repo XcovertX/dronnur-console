@@ -161,7 +161,7 @@ const Login: React.FC = () => (
         <button className="mt-2 w-full rounded-xl bg-black text-white py-2 text-sm">Sign in</button>
       </div>
     </Box>
-    <SectionHeader title="Discovery" subtitle="Detected units on the network" />
+    <SectionHeader title="Discovery" subtitle="Detected 1 radar on the network" />
     <Box>
       <div className="grid grid-cols-3 gap-3 text-sm">
         <div className="col-span-2 space-y-1">
