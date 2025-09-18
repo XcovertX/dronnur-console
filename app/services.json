@@ -1,0 +1,68 @@
+{
+  "missionset": "Default",
+  "modules": {},
+  "serial": "",
+  "services": {
+    "ADSBInternal": {
+      "Enabled": true,
+      "IP": "123.123.123.123",
+      "Port": 5555,
+      "Protocol": "TCP"
+    },
+    "AISInternal": {
+      "Enabled": true,
+      "IP": "225.0.0.2",
+      "Port": 4442,
+      "Protocol": "UDP"
+    },
+    "AsterixCat010": {
+      "Enabled": true,
+      "IP": "225.0.0.4",
+      "Port": 37001,
+      "Protocol": "UDP"
+    },
+    "AsterixCat240": {
+      "Enabled": true,
+      "IP": "239.1.2.4",
+      "Port": 37002,
+      "Protocol": "TCP"
+    },
+    "AsterixCat253": {
+      "Enabled": false,
+      "IP": "",
+      "Port": 0,
+      "Protocol": "TCP"
+    },
+    "EsmDetected": {
+      "Enabled": false,
+      "IP": "239.0.1.2",
+      "Port": 5000,
+      "Protocol": "TCP"
+    },
+    "ExternalGNS": {
+      "Enabled": true,
+      "IP": "192.168.4.105",
+      "Port": 8113,
+      "Protocol": "UDP"
+    },
+    "ExternalINS": {
+      "Enabled": false,
+      "IP": "",
+      "Port": 0,
+      "Protocol": "TCP"
+    },
+    "NMEATTM": {
+      "Enabled": false,
+      "IP": "",
+      "Port": 0,
+      "Protocol": "TCP"
+    },
+    "Syslog": {
+      "Enabled": false,
+      "IP": "",
+      "Port": 0,
+      "Protocol": "TCP"
+    }
+  },
+  "type": "D2D"
+}
