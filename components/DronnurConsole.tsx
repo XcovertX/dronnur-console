@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+
+// show a small tile:
+{/* <div className="text-sm">CAT-010 frames: {frames} (last {lastLen} bytes)</div> */}
 
 // Dronnur Radar Console – Interactive Wireframe (v1)
 // Notes:
@@ -178,8 +182,10 @@ const Login: React.FC = () => (
 
 const Dashboard: React.FC = () => (
   <div className="grid grid-cols-36 gap-4">
+    
     <div className="col-span-16">
       <Box title="Plan Position Indicator (PPI)" right={<div className="flex gap-2"> <StatPill label="Range" value="18 km"/> <StatPill label="North" value="Up"/> </div>}>
+        
         <PPI />
       </Box>
       <div className="mt-4 grid grid-cols-2 gap-4">
@@ -423,13 +429,31 @@ const TabButton: React.FC<{ label: string; active: boolean; onClick: ()=>void }>
   <button onClick={onClick} className={`px-3 py-2 rounded-xl text-sm border ${active ? "bg-black text-white" : "bg-white hover:bg-gray-50"}`}>{label}</button>
 );
 
-export default function DronnurConsoleWireframe() {
+export default function DronnurConsole() {
+  function useCat010() {
+  const [count, setCount] = useState(0);
+  const lastLen = useRef(0);
+
+  useEffect(() => {
+    const es = new EventSource("/api/cat010/stream");
+    es.onmessage = (ev) => {
+      const { len } = JSON.parse(ev.data);
+      lastLen.current = len;
+      setCount((c) => c + 1);
+    };
+    return () => es.close();
+  }, []);
+  return { frames: count, lastLen: lastLen.current };
+}
+
+// in your Dashboard:
+const { frames, lastLen } = useCat010();
   const tabs = ["Login","Dashboard","Antenna","Modes & Tx","Services","Data","Maintenance"] as const;
   const [active, setActive] = useState<(typeof tabs)[number]>("Dashboard");
 
   return (
     <div className="min-h-screen bg-gray-100">
-
+<div className="text-sm">CAT-010 frames: {frames} (last {lastLen} bytes)</div>
       {/* Content */}
       <div className="max-w-10xl mx-auto px-4 py-4">
         
@@ -438,7 +462,7 @@ export default function DronnurConsoleWireframe() {
           <div className="flex flex-grow items-center gap-3">
             <div className="h-8 w-8 rounded-xl bg-black" />
             <div>
-              <div className="text-sm font-semibold leading-4">Radar Console</div>
+              <div className="text-sm font-semibold leading-4">Dronnur Radar Console</div>
               <div className="text-xs text-gray-500">Interactive Wireframe</div>
             </div>
           </div>
