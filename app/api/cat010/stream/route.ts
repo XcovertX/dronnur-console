@@ -1,27 +1,59 @@
-import { onCat010 } from "@/app/lib/udp-cat010";
+// pages/api/cat010/stream.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import dgram from "dgram";
 
-export const runtime = "nodejs";
+export const config = { api: { bodyParser: false } };
 
-export async function GET() {
-  const stream = new ReadableStream({
-    start(controller) {
-      const enc = new TextEncoder();
-      const unsub = onCat010((buf) => {
-        // send as hex for now (parsing comes next)
-        const payload = JSON.stringify({ len: buf.length, hex: buf.toString("hex") });
-        controller.enqueue(enc.encode(`data: ${payload}\n\n`));
-      });
-      const ping = setInterval(() => controller.enqueue(enc.encode(":keepalive\n\n")), 15000);
-      // @ts-expect-error stash
-      this.unsub = unsub; this.ping = ping;
-      controller.enqueue(new TextEncoder().encode("retry: 3000\n\n"));
-    },
-    cancel() {
-      // @ts-expect-error read back
-      if (this.unsub) this.unsub();
-      // @ts-expect-error read back
-      if (this.ping) clearInterval(this.ping);
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  const group = (req.query.group as string) || "225.0.0.5";
+  const port = Number(req.query.port || 4445);
+  const iface = (req.query.iface as string) || "192.168.1.10";
+
+  // SSE headers
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive",
+    "X-Accel-Buffering": "no",
+  });
+
+  const sock = dgram.createSocket({ type: "udp4", reuseAddr: true });
+  let closed = false;
+
+  function send(id: number, data: any) {
+    res.write(`id: ${id}\n`);
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  }
+
+  sock.on("message", (msg, rinfo) => {
+    // You can parse ASTERIX here; for the wireframe, we just expose length & source.
+    send(Date.now(), { len: msg.length, from: `${rinfo.address}:${rinfo.port}` });
+  });
+
+  sock.on("listening", () => {
+    try {
+      sock.addMembership(group, iface);
+      try { sock.setMulticastInterface(iface); } catch {}
+      try { sock.setMulticastLoopback(true); } catch {}
+    } catch (e) {
+      send(Date.now(), { error: `addMembership failed: ${String(e)}` });
     }
   });
-  return new Response(stream, { headers: { "content-type": "text/event-stream" } });
+
+  sock.on("error", (e) => {
+    send(Date.now(), { error: String(e) });
+    cleanup();
+  });
+
+  function cleanup() {
+    if (closed) return;
+    closed = true;
+    try { sock.close(); } catch {}
+    try { res.end(); } catch {}
+  }
+
+  req.on("close", cleanup);
+  req.on("aborted", cleanup);
+
+  sock.bind(port, "0.0.0.0");
 }
