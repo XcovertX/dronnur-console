@@ -1,3 +1,5 @@
+"use client";
+import { useDiscovery } from "@/app/hooks/useDiscovery";
 import { useEffect, useRef, useState } from "react";
 
 const SectionHeader: React.FC<{ title: string; subtitle?: string }>=({ title, subtitle }) => (
@@ -437,9 +439,12 @@ export default function DronnurConsole() {
 }
 
 // in your Dashboard:
-const { frames, lastLen } = useCat010();
+  const { frames, lastLen } = useCat010();
   const tabs = ["Login","Dashboard","Antenna","Modes & Tx","Services","Data","Maintenance"] as const;
   const [active, setActive] = useState<(typeof tabs)[number]>("Dashboard");
+  const iface = "192.168.1.10"; // your NIC on the radar subnet
+  const { devices, selected, setSelected, loading } = useDiscovery(iface);
+
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -460,8 +465,8 @@ const { frames, lastLen } = useCat010();
             <TabButton key={t} label={t} active={active===t} onClick={()=>setActive(t)} />
           ))}
           <div className="flex flex-col items-center">
-            <StatPill label="Connected" value="192.168.1.248" />
-            <StatPill label="Unit" value="SN 00012345" />
+            <StatPill label="Connected" value={selected ? selected.infoHost : (loading ? "Scanning..." : "—")} />
+            <StatPill label="Unit" value={selected ? `info:${selected.infoPort}` : "—"} />
           </div>
         </div>
 
