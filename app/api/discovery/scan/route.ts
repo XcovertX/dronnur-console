@@ -1,12 +1,13 @@
-// pages/api/discovery/scan.ts
-import type { NextApiRequest, NextApiResponse } from "next";
+// app/api/discovery/scan/route.ts
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 import dgram from "dgram";
 
 const MCAST_ADDR = "227.228.229.230";
 const PORT = 59368;
 
 function parseBeacon(buf: Buffer) {
-  // Typical content includes a 'dspnor' line and "<ip>:<infoPort>"
   const text = buf.toString("utf8");
   const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
   const addrLine = lines.find(l => /^\d{1,3}(\.\d{1,3}){3}:\d+$/.test(l));
@@ -16,54 +17,67 @@ function parseBeacon(buf: Buffer) {
   return { raw: text, ...info };
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const iface = (req.query.iface as string) ?? "192.168.1.10";
-  const timeoutMs = Number(req.query.timeout ?? 1500);
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const iface = searchParams.get("iface") || "192.168.1.10";
+  const timeoutMs = Number(searchParams.get("timeout") || 1500);
 
-  const sock = dgram.createSocket({ type: "udp4", reuseAddr: true });
+  // Use a Promise so we can await the UDP scan then return a JSON Response
+  const result = await new Promise<{ devices: any[]; error?: string }>((resolve) => {
+    const sock = dgram.createSocket({ type: "udp4", reuseAddr: true });
+    const seen = new Map<string, any>();
+    let finished = false;
 
-  const seen = new Map<string, any>();
-  let closed = false;
-
-  function done() {
-    if (closed) return;
-    closed = true;
-    try { sock.close(); } catch {}
-    const list = Array.from(seen.values());
-    res.status(200).json({ devices: list });
-  }
-
-  sock.on("error", (e) => {
-    try { sock.close(); } catch {}
-    if (!closed) res.status(500).json({ error: String(e) });
-  });
-
-  sock.on("message", (msg, rinfo) => {
-    const parsed = parseBeacon(msg);
-    const key = `${rinfo.address}:${rinfo.port}|${parsed.infoAddress ?? ""}`;
-    if (!seen.has(key)) {
-      seen.set(key, {
-        from: `${rinfo.address}:${rinfo.port}`,
-        infoAddress: parsed.infoAddress,
-        infoHost: parsed.infoHost,
-        infoPort: parsed.infoPort,
-        raw: parsed.raw,
-      });
+    function finish(body: { devices: any[]; error?: string }) {
+      if (finished) return;
+      finished = true;
+      try { sock.close(); } catch {}
+      resolve(body);
     }
-  });
 
-  sock.on("listening", () => {
+    sock.on("error", (e) => {
+      finish({ devices: [], error: String(e) });
+    });
+
+    sock.on("message", (msg, rinfo) => {
+      const parsed = parseBeacon(msg);
+      const key = `${rinfo.address}:${rinfo.port}|${parsed.infoAddress ?? ""}`;
+      if (!seen.has(key)) {
+        seen.set(key, {
+          from: `${rinfo.address}:${rinfo.port}`,
+          infoAddress: parsed.infoAddress,
+          infoHost: parsed.infoHost,
+          infoPort: parsed.infoPort,
+          raw: parsed.raw,
+        });
+      }
+    });
+
+    sock.on("listening", () => {
+      try {
+        sock.addMembership(MCAST_ADDR, iface);
+        try { sock.setMulticastInterface(iface); } catch {}
+        try { sock.setMulticastLoopback(true); } catch {}
+      } catch (e) {
+        // Membership failed; still resolve with an error payload
+        return finish({ devices: [], error: `addMembership failed: ${String(e)}` });
+      }
+      setTimeout(() => {
+        finish({ devices: Array.from(seen.values()) });
+      }, timeoutMs);
+    });
+
     try {
-      sock.addMembership(MCAST_ADDR, iface);
-      try { sock.setMulticastInterface(iface); } catch {}
-      try { sock.setMulticastLoopback(true); } catch {}
+      sock.bind(PORT, "0.0.0.0");
+      // Safety: if 'listening' never fires
+      setTimeout(() => finish({ devices: [], error: "timeout (bind/listen)" }), timeoutMs + 500);
     } catch (e) {
-      // still return whatever we got (likely nothing)
-      return done();
+      finish({ devices: [], error: String(e) });
     }
-    // Stop after timeout
-    setTimeout(done, timeoutMs);
   });
 
-  sock.bind(PORT, "0.0.0.0"); // bind before addMembership
+  return new Response(JSON.stringify(result), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 }
