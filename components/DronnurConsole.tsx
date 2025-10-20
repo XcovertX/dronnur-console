@@ -1,5 +1,6 @@
 "use client";
 import { useDiscovery } from "@/app/hooks/useDiscovery";
+import { useRadarStatus } from "@/app/hooks/useRadarStatus";
 import { useEffect, useRef, useState } from "react";
 
 const SectionHeader: React.FC<{ title: string; subtitle?: string }>=({ title, subtitle }) => (
@@ -444,6 +445,15 @@ export default function DronnurConsole() {
   const [active, setActive] = useState<(typeof tabs)[number]>("Dashboard");
   const iface = "192.168.1.10"; // your NIC on the radar subnet
   const { devices, selected, setSelected, loading } = useDiscovery(iface);
+  const status = useRadarStatus(
+    selected ? { host: selected.infoHost, port: selected.infoPort, interval: 5000, request: "" } : null
+  );
+
+  // read fields safely from status.json
+  const txMode = status?.json?.TxMode ?? "—";
+  const txPower = status?.json?.TxPower ?? "—";
+  const rpm = status?.json?.Antenna?.RPM ?? "—";
+  const tilt = status?.json?.Antenna?.Tilt ?? "—";
 
 
   return (
@@ -467,6 +477,10 @@ export default function DronnurConsole() {
           <div className="flex flex-col items-center">
             <StatPill label="Connected" value={selected ? selected.infoHost : (loading ? "Scanning..." : "—")} />
             <StatPill label="Unit" value={selected ? `info:${selected.infoPort}` : "—"} />
+            <StatPill label="Tx Mode" value={String(txMode)} />
+            <StatPill label="Tx Power" value={String(txPower)} />
+            <StatPill label="RPM" value={String(rpm)} />
+            <StatPill label="Tilt" value={`${tilt}°`} />
           </div>
         </div>
 
