@@ -1,15 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 
-
-// show a small tile:
-{/* <div className="text-sm">CAT-010 frames: {frames} (last {lastLen} bytes)</div> */}
-
-// Dronnur Radar Console – Interactive Wireframe (v1)
-// Notes:
-// - Pure React + TailwindCSS (no external UI libs) for maximum portability in preview.
-// - This is a clickable wireframe to communicate layout & workflow, not final UI.
-// - All controls are non-functional placeholders unless otherwise noted.
-
 const SectionHeader: React.FC<{ title: string; subtitle?: string }>=({ title, subtitle }) => (
   <div className="mb-4">
     <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
