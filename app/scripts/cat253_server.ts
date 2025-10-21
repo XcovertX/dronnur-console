@@ -1,35 +1,45 @@
 // scripts/cat253_server.ts
 import net from "net";
 
-const LISTEN_PORT = Number(process.env.LISTEN_PORT || "23523");
-const HOST = process.env.HOST || "0.0.0.0";
-
-function buildD2D(body: object) {
-  const payload = JSON.stringify(body);
-  const header =
-    "PROTOCOL=D2D\r\n" +
-    "VERSION=1.0\r\n" +
-    "TYPE=TEXT\r\n" +
-    `LENGTH=${Buffer.byteLength(payload, "utf8")}\r\n\r\n`;
-  return Buffer.from(header + payload + "\n", "utf8");
+function d2dFrame(obj: object) {
+  const body = Buffer.from(JSON.stringify(obj), "utf8");
+  const head = Buffer.from(`PROTOCOL=D2D\r\nLENGTH=${body.length}\r\n\r\n`, "utf8");
+  return Buffer.concat([head, body]);
 }
 
-const server = net.createServer((socket) => {
-  console.log(`[CAT253] Connected from ${socket.remoteAddress}:${socket.remotePort}`);
+const HOST = process.env.HOST || "192.168.1.253";
+const PORT = Number(process.env.PORT || 23523);
 
-  socket.on("data", (buf) => {
-    process.stdout.write(`[CAT253] RX ${buf.length} bytes\n`);
-    process.stdout.write(buf.toString("utf8"));
+const server = net.createServer((sock) => {
+  console.log("Radar connected:", sock.remoteAddress, sock.remotePort);
+
+  // Request runtime status on connect (adjust command/shape to your ICD)
+  const req = d2dFrame({ cmd: "Status", path: "RunTime" });
+  setTimeout(() => sock.write(req), 150);
+
+  let buf = Buffer.alloc(0);
+  sock.on("data", (chunk) => {
+    buf = Buffer.concat([buf, chunk]);
+    const text = buf.toString("utf8");
+    const sep = text.indexOf("\r\n\r\n");
+    if (sep >= 0) {
+      const header = text.slice(0, sep);
+      const m = header.match(/LENGTH=(\d+)/i);
+      const len = m ? Number(m[1]) : NaN;
+      const body = text.slice(sep + 4);
+      if (Number.isFinite(len) && body.length >= len) {
+        const jsonText = body.slice(0, len);
+        console.log("RunTime:", jsonText);
+        try { console.log("Parsed:", JSON.parse(jsonText)); } catch {}
+        buf = Buffer.from(body.slice(len)); // keep leftover for next messages
+      }
+    }
   });
 
-  socket.on("close", () => console.log("[CAT253] Socket closed"));
-  socket.on("error", (e) => console.error("[CAT253] Socket error:", e.message));
-
-  // (Safe) send Tx OFF upon connect so we never radiate by accident:
-  const frame = buildD2D({ InitSystem: "skip", TxMode: "off" });
-  socket.write(frame);
+  sock.on("close", () => console.log("Radar disconnected"));
+  sock.on("error", (e) => console.error("Socket error:", e));
 });
 
-server.listen(LISTEN_PORT, HOST, () => {
-  console.log(`[CAT253] Listening on ${HOST}:${LISTEN_PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`CAT-253 server listening on ${HOST}:${PORT}`);
 });
