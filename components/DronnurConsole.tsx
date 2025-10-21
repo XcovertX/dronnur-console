@@ -20,7 +20,7 @@ const LabeledRow: React.FC<{ label: string; children?: React.ReactNode }>=({ lab
 );
 
 const StatPill: React.FC<{ label: string; value: string }>=({ label, value }) => (
-  <div className="px-3 py-1 rounded-full text-xs/3 bg-gray-100">{label}: <span className="font-semibold">{value}</span></div>
+  <div className="px-2 py-1 rounded-full text-xs/3 bg-gray-100">{label}: <span className="font-semibold">{value}</span></div>
 );
 
 const Toggle: React.FC<{ label: string }>=({ label }) => (
@@ -197,8 +197,8 @@ const Dashboard: React.FC = () => {
           
           <StatPill label="Tx Mode"  value={String(j.TxMode ?? "—")} />
           <StatPill label="Tx Power" value={String(j.TxPower ?? "—")} />
+          <StatPill label="Tx Range" value={String(j.TxRange ?? "—")} />
           <StatPill label="RPM"      value={String(j?.Antenna?.RPM ?? j?.RPM ?? "—")} />
-          <StatPill label="Tilt"     value={`${j?.AntennaTilt ?? j?.AntennaTilt ?? "—"}°`} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Box title="Sensors" className="col-span-2">
