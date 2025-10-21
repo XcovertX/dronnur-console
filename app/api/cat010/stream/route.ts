@@ -1,27 +1,30 @@
-// app/api/cat010/stream/route.ts  (or src/app/api/...)
-// App Router, Node runtime, SSE + UDP multicast
-
-export const runtime = "nodejs";          // required: Edge doesn't support dgram
-export const dynamic = "force-dynamic";   // keep the stream open
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 import dgram from "dgram";
 
+function isMulticast(ip: string) {
+  const m = ip.match(/^(\d+)\./);
+  if (!m) return false;
+  const first = Number(m[1]);
+  return first >= 224 && first <= 239;
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const group = searchParams.get("group") || "225.0.0.5";
-  const port  = Number(searchParams.get("port") || 4445);
+  const group = searchParams.get("group") || "225.0.0.4";   // may be multicast OR unicast
+  const port  = Number(searchParams.get("port") || 37001);
   const iface = searchParams.get("iface") || "192.168.1.10";
 
   const stream = new ReadableStream({
     start(controller) {
       const enc = new TextEncoder();
-
-      function send(obj: any) {
-        const chunk = `id: ${Date.now()}\n` + `data: ${JSON.stringify(obj)}\n\n`;
-        controller.enqueue(enc.encode(chunk));
-      }
-
       const sock = dgram.createSocket({ type: "udp4", reuseAddr: true });
+
+      const send = (obj: any) => {
+        controller.enqueue(enc.encode(`id: ${Date.now()}\n` +
+                                      `data: ${JSON.stringify(obj)}\n\n`));
+      };
 
       sock.on("message", (msg, rinfo) => {
         send({ len: msg.length, from: `${rinfo.address}:${rinfo.port}` });
@@ -29,30 +32,35 @@ export async function GET(req: Request) {
 
       sock.on("listening", () => {
         try {
-          sock.addMembership(group, iface);
-          try { sock.setMulticastInterface(iface); } catch {}
-          try { sock.setMulticastLoopback(true); } catch {}
-          send({ status: "listening", group, port, iface });
+          if (isMulticast(group)) {
+            // Multicast path
+            sock.addMembership(group, iface);
+            try { sock.setMulticastInterface(iface); } catch {}
+            try { sock.setMulticastLoopback(true); } catch {}
+            send({ status: "listening", mode: "multicast", group, port, iface });
+          } else {
+            // Unicast path — do NOT addMembership
+            send({ status: "listening", mode: "unicast", ip: group, port, iface });
+          }
         } catch (e) {
-          send({ error: `addMembership failed: ${String(e)}` });
+          send({ error: `join/setup failed: ${String(e)}` });
         }
       });
 
       sock.on("error", (e) => {
         send({ error: String(e) });
-        cleanup();
-      });
-
-      function cleanup() {
         try { sock.close(); } catch {}
         try { controller.close(); } catch {}
-      }
+      });
+
+      // Bind first; 0.0.0.0 is correct for both multicast and unicast
+      sock.bind(port, "0.0.0.0");
 
       // Close when client disconnects
-      const abort = (req as any).signal as AbortSignal | undefined;
-      if (abort) abort.addEventListener("abort", cleanup);
-
-      sock.bind(port, "0.0.0.0");
+      (req as any).signal?.addEventListener("abort", () => {
+        try { sock.close(); } catch {}
+        try { controller.close(); } catch {}
+      });
     },
   });
 

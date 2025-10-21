@@ -1,6 +1,7 @@
 "use client";
 import { useDiscovery } from "@/app/hooks/useDiscovery";
 import { useRadarStatus } from "@/app/hooks/useRadarStatus";
+import { useRadarStatusVendor } from "@/app/hooks/useRadarStatusVendor";
 import { useEffect, useRef, useState } from "react";
 
 const SectionHeader: React.FC<{ title: string; subtitle?: string }>=({ title, subtitle }) => (
@@ -173,12 +174,16 @@ const Login: React.FC = () => (
   </div>
 );
 
-const Dashboard: React.FC = () => (
+const Dashboard: React.FC = () => {
+
+  const status = useRadarStatusVendor("192.168.1.248");
+  const j = status?.json ?? {};
+
+  return (
   <div className="grid grid-cols-36 gap-4">
     
     <div className="col-span-16">
       <Box title="Plan Position Indicator (PPI)" right={<div className="flex gap-2"> <StatPill label="Range" value="18 km"/> <StatPill label="North" value="Up"/> </div>}>
-        
         <PPI />
       </Box>
       <div className="mt-4 grid grid-cols-2 gap-4">
@@ -189,22 +194,24 @@ const Dashboard: React.FC = () => (
     <div className="col-span-10 space-y-4">
       <Box title="System Status" className="">
         <div className="flex mb-2 gap-2">
-          <StatPill label="Tx Mode" value="Surveillance" />
-          <StatPill label="Tx Power" value="10" />
-          <StatPill label="RPM" value="10.0" />
-          <StatPill label="Tilt" value="0°" />
+          
+          <StatPill label="Tx Mode"  value={String(j.TxMode ?? "—")} />
+          <StatPill label="Tx Power" value={String(j.TxPower ?? "—")} />
+          <StatPill label="RPM"      value={String(j?.Antenna?.RPM ?? j?.RPM ?? "—")} />
+          <StatPill label="Tilt"     value={`${j?.AntennaTilt ?? j?.AntennaTilt ?? "—"}°`} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Box title="Sensors" className="col-span-2">
-            <LabeledRow label="GPS Source">External GNS</LabeledRow>
-            <LabeledRow label="INS Source">External INS</LabeledRow>
-            <LabeledRow label="Gyro Heading">132.5°</LabeledRow>
+            <LabeledRow label="GPS Source">{j?.ExternalGNS ? "Internal" : "External"}</LabeledRow>
+            <LabeledRow label="INS Source">{j?.InternalINS ? "Internal" : "External"}</LabeledRow>
+            <LabeledRow label="Gyro Heading">{`${j?.Status?.Heading?.True ?? j?.Status?.Heading?.True ?? "—"}°`}</LabeledRow>
           </Box>
           <Box title="Modules Temps"className="col-span-2">
-            <LabeledRow label="Processor">32°C</LabeledRow>
-            <LabeledRow label="RF Converter">33°C</LabeledRow>
-            <LabeledRow label="Power Amp">35°C</LabeledRow>
-            <LabeledRow label="Clock Gen">31°C</LabeledRow>
+            <LabeledRow label="Processor">{`${j?.Antenna?.ProcHW?.Temp ?? j?.ProcHW?.Temp ?? "—"}°C`}</LabeledRow>
+            <LabeledRow label="RF Converter">{`${j?.Antenna?.RfConverter?.Temp ?? j?.RfConverter?.Temp ?? "—"}°C`}</LabeledRow>
+            <LabeledRow label="Power Amplifier">{`${j?.Antenna?.PowerAmp?.Temp ?? j?.PowerAmp?.Temp ?? "—"}°C`}</LabeledRow>
+            <LabeledRow label="Clock Generator">{`${j?.Antenna?.ClkGenerator?.Temp ?? j?.ClkGenerator?.Temp ?? "—"}°C`}</LabeledRow>
+            <LabeledRow label="System Hardware">{`${j?.Antenna?.SystemHW?.Temp ?? j?.SystemHW?.Temp ?? "—"}°C`}</LabeledRow>
           </Box>
         </div>
       </Box>
@@ -221,7 +228,8 @@ const Dashboard: React.FC = () => (
       <Box title="Active Tracks" className="h-187"><TracksTable /></Box>
     </div>
   </div>
-);
+  );
+};
 
 const Antenna: React.FC = () => (
   <div className="grid grid-cols-12 gap-4">
@@ -445,20 +453,9 @@ export default function DronnurConsole() {
   const [active, setActive] = useState<(typeof tabs)[number]>("Dashboard");
   const iface = "192.168.1.10"; // your NIC on the radar subnet
   const { devices, selected, setSelected, loading } = useDiscovery(iface);
-  const status = useRadarStatus(
-    selected ? { host: selected.infoHost, port: selected.infoPort, interval: 5000, request: "" } : null
-  );
-
-  // read fields safely from status.json
-  const txMode = status?.json?.TxMode ?? "—";
-  const txPower = status?.json?.TxPower ?? "—";
-  const rpm = status?.json?.Antenna?.RPM ?? "—";
-  const tilt = status?.json?.Antenna?.Tilt ?? "—";
-
 
   return (
     <div className="min-h-screen bg-gray-100">
-<div className="text-sm">CAT-010 frames: {frames} (last {lastLen} bytes)</div>
       {/* Content */}
       <div className="max-w-10xl mx-auto px-4 py-4">
         
@@ -477,10 +474,6 @@ export default function DronnurConsole() {
           <div className="flex flex-col items-center">
             <StatPill label="Connected" value={selected ? selected.infoHost : (loading ? "Scanning..." : "—")} />
             <StatPill label="Unit" value={selected ? `info:${selected.infoPort}` : "—"} />
-            <StatPill label="Tx Mode" value={String(txMode)} />
-            <StatPill label="Tx Power" value={String(txPower)} />
-            <StatPill label="RPM" value={String(rpm)} />
-            <StatPill label="Tilt" value={`${tilt}°`} />
           </div>
         </div>
 
